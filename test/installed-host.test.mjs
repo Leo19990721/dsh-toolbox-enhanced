@@ -35,7 +35,7 @@ test('installed Cordis activates original toolbox plus companion with one servic
     assert.equal(typeof service.exportGlobalJson, 'function');
     phase = 'companion';
     const companion = ctx.plugin(enhanced); await companion.inertia; states.push(companion);
-    // ctx.inject starts a child fiber and imports the three small original helpers.
+    // Wait for the injected child that installs the reversible timeout guard.
     phase = 'companion child fibers';
     await Promise.all([...ctx.registry.values()].flatMap(runtime => [...runtime.fibers].map(fiber => fiber.await())));
     assert.equal(companion.state, 2, 'companion active');

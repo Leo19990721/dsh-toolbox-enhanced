@@ -14,19 +14,31 @@ test('companion ships no copied toolbox backend or UI bundle', async () => {
   assert.equal(pkg.exports['./client'], './client.js');
 });
 
-test('existing startup timeout survives edits; original validation and redaction restoration are reused', async () => {
-  const { prepareEdit } = await load('startup-timeout.js');
-  const require = createRequire(process.env.DSH_PROFILE_DIR ? process.env.DSH_PROFILE_DIR + '/package.json' : import.meta.url);
-  const upstream = new URL('./lib/', pathToFileURL(require.resolve('dsh-toolbox-ui/package.json')));
-  const { normalizeMcpImport } = await import(new URL('mcp-config.js', upstream));
-  const { restoreRedactedSpec } = await import(new URL('mcp-projection.js', upstream));
-  const { toMcpClientConfig } = await import(new URL('workspace-config.js', upstream));
-  const original = { serverName: 'example', transport: 'stdio', command: 'node', args: ['secret'], startupTimeoutMs: 60000, toolCallTimeoutMs: 120000, failOnStartupError: false };
-  const next = prepareEdit({ name: 'example', transport: 'stdio', command: 'node', args: ['__DSH_MCP_REDACTED__'], toolCallTimeoutMs: 120000, failOnStartupError: false }, original, { normalizeMcpImport, restoreRedactedSpec, toMcpClientConfig });
-  assert.equal(next.startupTimeoutMs, 60000);
-  assert.deepEqual(next.args, ['secret']);
-  assert.equal(next.toolCallTimeoutMs, 120000);
-  assert.throws(() => prepareEdit({ name: 'example', transport: 'stdio', command: 'node', startupTimeoutMs: -1 }, original, { normalizeMcpImport, restoreRedactedSpec, toMcpClientConfig }), /startupTimeoutMs/);
+test('timeout-bearing edits fail before any write and preserve raw expressions and connection values', async () => {
+  const { installStartupTimeout } = await load('startup-timeout.js');
+  const raw = { serverName: 'example', transport: 'stdio', command: 'node', args: ['synthetic'], env: { DEMO: { __jsExpr: 'process.env.DEMO' } }, startupTimeoutMs: 60000 };
+  const entry = { options: { name: '@deepseek-ai/dsh-mcp-client', config: raw } };
+  const before = structuredClone(raw);
+  let writes = 0;
+  const service = { update: async () => { writes++; } };
+  const ctx = { loader: { entries: () => [entry] }, configEditor: { entries: () => [entry], edit: async (_entry, change) => { writes++; Object.assign(raw, change(raw)); } } };
+  const dispose = installStartupTimeout(service, ctx);
+  try {
+    await assert.rejects(service.update({ name: 'example', transport: 'stdio', command: 'changed', env: { DEMO: '__DSH_MCP_REDACTED__' } }), error => error.code === 'TOOLBOX_STARTUP_TIMEOUT_EDIT_UNSUPPORTED' && /原生配置编辑/.test(error.message));
+    assert.equal(writes, 0, 'neither upstream persistence nor native override writing runs');
+    assert.deepEqual(raw, before, 'raw expression objects never pass through String(raw)');
+  } finally { dispose(); }
+});
+
+test('a new explicit startup timeout is rejected even without a matching loader row', async () => {
+  const { installStartupTimeout } = await load('startup-timeout.js');
+  let writes = 0;
+  const service = { update: async () => { writes++; } };
+  const dispose = installStartupTimeout(service, { loader: { entries: () => [] } });
+  try {
+    await assert.rejects(service.update({ name: 'new', startupTimeoutMs: 45000 }), { code: 'TOOLBOX_STARTUP_TIMEOUT_EDIT_UNSUPPORTED' });
+    assert.equal(writes, 0);
+  } finally { dispose(); }
 });
 
 const reactRequire = createRequire(process.env.DSH_TEST_REACT_ANCHOR || import.meta.url);
@@ -67,24 +79,23 @@ test('original update checker detects a newer community release and caches only 
   } finally { globalThis.fetch = before; }
 });
 
-test('startup timeout decorator uses the native editor, preserves other settings and restores upstream methods', async () => {
+test('ordinary edits retain original arguments and result; timeout export and unload remain reversible', async () => {
   const { installStartupTimeout } = await load('startup-timeout.js');
-  const require = createRequire(process.env.DSH_PROFILE_DIR ? process.env.DSH_PROFILE_DIR + '/package.json' : import.meta.url);
-  const base = new URL('./lib/', pathToFileURL(require.resolve('dsh-toolbox-ui/package.json')));
-  const helpers = Object.assign({}, ...await Promise.all(['mcp-config.js', 'mcp-projection.js', 'workspace-config.js'].map(file => import(new URL(file, base)))));
-  const entry = { options: { name: '@deepseek-ai/dsh-mcp-client', id: 'custom-not-assumed', config: { serverName: 'example', transport: 'stdio', command: 'node', args: ['secret'], startupTimeoutMs: 60000, toolCallTimeoutMs: 120000, reconnect: { enabled: true }, customHostSetting: 'keep' } } };
-  let edits = 0;
-  const service = { update: async () => ({ original: true }), exportGlobalJson: async () => ({ json: JSON.stringify({ mcpServers: { example: { command: 'node' } } }) }), updateHint: async () => 'original update' };
-  const original = { ...service };
-  const ctx = { loader: { entries: () => [entry] }, configEditor: { entries: () => [entry], edit: async (owner, change) => { assert.equal(owner, entry); entry.options.config = change(entry.options.config); edits++; } } };
-  const dispose = installStartupTimeout(service, ctx, helpers);
-  assert.equal(service.updateHint, original.updateHint);
-  await service.update({ name: 'example', transport: 'stdio', command: 'node', args: ['__DSH_MCP_REDACTED__'] });
-  assert.equal(edits, 1); assert.equal(entry.options.config.startupTimeoutMs, 60000); assert.equal(entry.options.config.customHostSetting, 'keep'); assert.deepEqual(entry.options.config.args, ['secret']);
-  assert.equal(entry.options.config.toolCallTimeoutMs, undefined, 'ordinary fields removed in the form are not silently retained');
-  assert.equal(JSON.parse((await service.exportGlobalJson()).json).mcpServers.example.startupTimeoutMs, 60000);
-  assert.deepEqual(await service.update({ name: 'other' }), { original: true });
-  dispose(); assert.equal(service.update, original.update); assert.equal(service.exportGlobalJson, original.exportGlobalJson);
+  const entry = { options: { name: '@deepseek-ai/dsh-mcp-client', id: 'custom-not-assumed', config: { serverName: 'example', startupTimeoutMs: 60000 } } };
+  const calls = [], result = { persisted: 'applied', live: 'skipped', liveReason: 'synthetic' };
+  const service = { update: async function(...args) { calls.push({ owner: this, args }); return result; }, exportGlobalJson: async () => ({ count: 1, json: JSON.stringify({ mcpServers: { example: { command: 'node' } } }) }), updateHint: async () => 'original update' };
+  const original = Object.getOwnPropertyDescriptors(service);
+  const dispose = installStartupTimeout(service, { loader: { entries: () => [entry] } });
+  assert.equal(service.updateHint, original.updateHint.value);
+  const spec = { name: 'ordinary', transport: 'stdio', command: 'node' }, signal = new AbortController().signal;
+  assert.equal(await service.update(spec, signal), result, 'do not fabricate success');
+  assert.equal(calls[0].owner, service);
+  assert.deepEqual(calls[0].args, [spec, signal]);
+  const exported = await service.exportGlobalJson();
+  assert.equal(exported.count, 1);
+  assert.deepEqual(JSON.parse(exported.json).mcpServers.example, { command: 'node', startupTimeoutMs: 60000 });
+  dispose();
+  assert.deepEqual(Object.getOwnPropertyDescriptors(service), original);
 });
 
 test('existing safety policy remains byte-for-byte and keeps approval decisions', async () => {

@@ -1,1 +1,1 @@
-{"meta":{"title":"Toolbox Enhanced","description":"配合社区原版 dsh-toolbox-ui 使用。原版负责 MCP、技能、工具管理和检查更新；本插件只提供原生样式、上方侧栏入口及本机适配，保留启动超时和原有权限规则。停用增强后恢复原版界面。"}}
+{"meta":{"title":"Toolbox Enhanced","description":"配合社区原版 dsh-toolbox-ui 1.12.0 使用，提供原生样式、上方侧栏入口、启动超时导出和原有权限规则。带 startupTimeoutMs 的连接暂时拒绝在工具箱中编辑，并提示改用 DSH 原生配置编辑；拒绝时不保存任何修改。其余管理和检查更新由原版负责，停用增强恢复原版界面。"}}
