@@ -1,0 +1,10 @@
+import { run } from 'node:test';
+import { spec } from 'node:test/reporters';
+const installed = Boolean(process.env.DSH_INSTALL_DIR && process.env.DSH_PROFILE_DIR);
+if (installed) await import('./runtime-hook.mjs');
+const files = ['test/enhanced.test.mjs', 'test/release.test.mjs'];
+if (installed) files.push('test/installed-host.test.mjs');
+else console.log('Installed-runtime integration requires DSH_INSTALL_DIR and DSH_PROFILE_DIR; running portable checks.');
+const stream = run({ files, isolation: 'none' });
+stream.on('test:fail', () => { process.exitCode = 1; });
+stream.compose(spec).pipe(process.stdout);

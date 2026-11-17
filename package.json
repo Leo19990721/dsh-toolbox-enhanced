@@ -1,0 +1,78 @@
+{
+  "name": "@local/dsh-toolbox-enhanced",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Toolbox Enhanced：社区原版负责功能和更新，本插件只增加原生界面、侧栏入口及本机适配。",
+  "main": "host.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leo19990721/dsh-toolbox-enhanced.git"
+  },
+  "homepage": "https://github.com/Leo19990721/dsh-toolbox-enhanced#readme",
+  "bugs": {
+    "url": "https://github.com/Leo19990721/dsh-toolbox-enhanced/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-enhanced.mjs",
+    "test": "node scripts/test.mjs",
+    "test:portable": "node --test test/enhanced.test.mjs test/release.test.mjs",
+    "release:pack": "pwsh -NoProfile -File scripts/pack.ps1"
+  },
+  "exports": {
+    "./client": "./client.js",
+    ".": "./host.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "host.js",
+    "client.js",
+    "src/*.js",
+    "lib/local-policy.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "peerDependencies": {
+    "dsh-toolbox-ui": "1.12.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.1.0",
+    "@deepseek-ai/cordis-plugin-loader": "1.1.0",
+    "dsh-toolbox-ui": "1.12.0",
+    "react": "18.3.1"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "dsh-toolbox-ui",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "mcp",
+    "skills",
+    "skill-manager",
+    "agent-skills"
+  ],
+  "license": "MIT",
+  "engines": {
+    "dsh": "0.2.2-rc.3"
+  }
+}

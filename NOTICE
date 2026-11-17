@@ -1,0 +1,9 @@
+Toolbox Enhanced, a companion to dsh-toolbox-ui.
+Upstream: https://github.com/Imzl-zl/dsh-toolbox-ui
+Originally adapted from 1.12.0, commit fc75df39fcb2df31e8a5f9d7d05158595aaab07a.
+Copyright (c) 2026 dsh-toolbox-ui contributors. MIT license retained in LICENSE.
+The community bundle remains the single implementation of management services,
+RPC, original components and update checking. This package decorates registered
+React output and retains native-shell.css and the existing local tool policy.
+A small native-config-editor adapter preserves existing startupTimeoutMs on edits
+and export while upstream 1.12.0 does not handle this field.

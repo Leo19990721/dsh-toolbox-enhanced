@@ -1,0 +1,2 @@
+# DSH supplies Host APIs. Do not download a second runtime for development.
+autoInstallPeers: false

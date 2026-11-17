@@ -1,0 +1,11 @@
+- insert:
+    - id: native-toolbox-user-skills
+      name: '@deepseek-ai/dsh-skill-filesystem'
+      config:
+        providerName: native-toolbox-user
+        includeDefaultRoots: false
+        customSkillDirs: !!js "[dshHomePath('skills', 'user')]"
+        watch: true
+        watchFollowSymlinks: false
+    - id: native-toolbox-ui
+      name: '@local/dsh-toolbox-enhanced'
