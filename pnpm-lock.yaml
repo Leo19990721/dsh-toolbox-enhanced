@@ -15,8 +15,8 @@ importers:
         specifier: 1.1.0
         version: 1.1.0(@deepseek-ai/cordis@4.1.0)
       dsh-toolbox-ui:
-        specifier: 1.12.0
-        version: 1.12.0(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0)
+        specifier: 1.12.1
+        version: 1.12.1(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0)
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -53,8 +53,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  dsh-toolbox-ui@1.12.0:
-    resolution: {integrity: sha512-VT72UjBWeXH+GxMXkvY0qux6jftyTPUZZoapYiedlyt3Set9KMKY1wqz4asXbmp7/eHAyADkj8WcDTUR+kPprQ==}
+  dsh-toolbox-ui@1.12.1:
+    resolution: {integrity: sha512-08/+N3TnmGD1+UCekVZD7ChppigiCnSgdWsvidXuhtM62giItuOaS8iB8eRNi+hN8O9yCGqV2eZr6IKmPKboTQ==}
     engines: {dsh: '>=0.2.1-rc.5 <0.3.0'}
     peerDependencies:
       '@deepseek-ai/cordis': '>=4.0.5 <4.2.0'
@@ -116,7 +116,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  dsh-toolbox-ui@1.12.0(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0):
+  dsh-toolbox-ui@1.12.1(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0):
     dependencies:
       '@deepseek-ai/cordis': 4.1.0(@deepseek-ai/cordis-plugin-loader@1.1.0)
       '@deepseek-ai/cordis-plugin-loader': 1.1.0(@deepseek-ai/cordis@4.1.0)

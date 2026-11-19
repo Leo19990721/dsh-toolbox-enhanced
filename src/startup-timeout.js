@@ -1,4 +1,4 @@
-// toolbox-ui 1.12.0 reads only its insert rows, while the native editor writes
+// The supported toolbox-ui releases only read their insert rows, while the native editor writes
 // overrides. Never mix those persistence paths or normalize raw !!js values.
 export function installStartupTimeout(service, ctx) {
   const saved = new Map();
@@ -15,7 +15,7 @@ export function installStartupTimeout(service, ctx) {
     const name = String(spec?.name || '').trim();
     const hasTimeout = spec?.startupTimeoutMs !== undefined || entries().some(entry => entry.options.config?.serverName === name && entry.options.config.startupTimeoutMs !== undefined);
     if (hasTimeout) {
-      const error = new Error('该 MCP 含 startupTimeoutMs；Toolbox 1.12.0 暂不支持安全编辑，请改用 DSH 原生配置编辑。本次未保存任何修改。');
+      const error = new Error('该 MCP 含 startupTimeoutMs，不能在工具箱中安全编辑。请改用 DSH 原生配置编辑；本次未保存任何修改。');
       error.code = 'TOOLBOX_STARTUP_TIMEOUT_EDIT_UNSUPPORTED';
       throw error;
     }

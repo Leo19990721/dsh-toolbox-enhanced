@@ -1,4 +1,5 @@
-param([string]$NodePath, [string]$PnpmPath)
+#requires -Version 7.0
+param([string]$NodePath, [string]$PnpmPath, [switch]$InstalledRuntime)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $manifest = Get-Content -LiteralPath (Join-Path $root 'package.json') -Raw | ConvertFrom-Json
@@ -19,8 +20,12 @@ function Invoke-Node([string[]]$NodeArgs, [hashtable]$ExtraEnv = @{}, [string]$E
   if ($process.ExitCode -ne 0) { throw "Node command failed ($($process.ExitCode)): $($NodeArgs -join ' ')" }
 }
 Invoke-Node -NodeArgs @('scripts/build-enhanced.mjs')
-$testNode = if ($env:DSH_INSTALL_DIR -and $env:DSH_PROFILE_DIR -and $env:DSH_NODE_EXECUTABLE) { $env:DSH_NODE_EXECUTABLE } else { $node }
-Invoke-Node -NodeArgs @('scripts/test.mjs') -Executable $testNode
+if ($InstalledRuntime) {
+  if (!$env:DSH_INSTALL_DIR -or !$env:DSH_NODE_EXECUTABLE) { throw 'InstalledRuntime requires DSH_INSTALL_DIR and DSH_NODE_EXECUTABLE.' }
+  Invoke-Node -NodeArgs @('scripts/test.mjs', '--installed-runtime') -Executable $env:DSH_NODE_EXECUTABLE
+} else {
+  Invoke-Node -NodeArgs @('scripts/test.mjs')
+}
 foreach ($file in @('host.js','client.js','src/client-shell.js','src/startup-timeout.js')) { Invoke-Node -NodeArgs @('--check', $file) }
 $tarball = Join-Path $root ".local-install/dsh-toolbox-enhanced-$($manifest.version).tgz"
 if ($PnpmPath) { Invoke-Node -NodeArgs @($PnpmPath, 'pack', '--out', $tarball) }

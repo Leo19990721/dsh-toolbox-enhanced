@@ -6,7 +6,8 @@ The community bundle remains the single implementation of management services,
 RPC, original components and update checking. This package decorates registered
 React output and retains native-shell.css and the existing local tool policy.
 The startup timeout adapter preserves existing startupTimeoutMs on export.
-Since 0.1.2 it rejects timeout-bearing edits before any write: upstream 1.12.0
-reads insert rows only, so writing native overrides would leave stale views;
-normalizing raw expression objects could also corrupt stored references.
+Since 0.1.2 it rejects timeout-bearing edits before any write. Both supported
+upstream releases (1.12.0 and 1.12.1) read only insert rows, so writing native
+overrides would leave stale views; normalizing raw expressions could also
+corrupt stored references.
 Use DSH native configuration editing for those connections.

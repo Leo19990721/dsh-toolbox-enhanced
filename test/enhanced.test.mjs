@@ -9,7 +9,8 @@ const load = name => import(new URL('../src/' + name, import.meta.url));
 test('companion ships no copied toolbox backend or UI bundle', async () => {
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.equal(pkg.name, '@local/dsh-toolbox-enhanced');
-  assert.equal(pkg.peerDependencies['dsh-toolbox-ui'], '1.12.0');
+  assert.equal(pkg.peerDependencies['dsh-toolbox-ui'], '>=1.12.0 <=1.12.1');
+  assert.equal(pkg.devDependencies['dsh-toolbox-ui'], '1.12.1');
   assert.ok(!pkg.files.includes('lib'));
   assert.equal(pkg.exports['./client'], './client.js');
 });
@@ -66,14 +67,16 @@ test('unrecognised upstream UI remains usable instead of being replaced', async 
   assert.equal(enhancePanel(node, React, () => {}, key => key), node);
 });
 test('original update checker detects a newer community release and caches only the original package', async () => {
-  const require = createRequire(process.env.DSH_PROFILE_DIR ? process.env.DSH_PROFILE_DIR + '/package.json' : import.meta.url);
-  const base = new URL('./lib/', pathToFileURL(require.resolve('dsh-toolbox-ui/package.json')));
-  const { checkForUpdate } = await import(new URL('update-hint.js', base));
+  const require = createRequire(import.meta.url);
+  const manifest = process.env.DSH_TEST_TOOLBOX_MANIFEST || require.resolve('dsh-toolbox-ui/package.json');
+  const base = pathToFileURL(manifest);
+  const { checkForUpdate } = await import(new URL('./lib/update-hint.js', base));
+  const { version } = JSON.parse(await readFile(base, 'utf8'));
   const before = globalThis.fetch, calls = [];
   globalThis.fetch = async url => { calls.push(url); return { ok: true, json: async () => ({ version: '1.13.0' }) }; };
   try {
     const result = await checkForUpdate(Date.now(), true);
-    assert.equal(result.current, '1.12.0'); assert.equal(result.latest, '1.13.0'); assert.equal(result.updateAvailable, true);
+    assert.equal(result.current, version); assert.equal(result.latest, '1.13.0'); assert.equal(result.updateAvailable, true);
     assert.equal(calls[0], 'https://registry.npmjs.org/dsh-toolbox-ui/latest');
     assert.deepEqual(await checkForUpdate(), result); assert.equal(calls.length, 1);
   } finally { globalThis.fetch = before; }

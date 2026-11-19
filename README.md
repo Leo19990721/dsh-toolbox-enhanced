@@ -4,7 +4,9 @@
 
 ## 安装
 
-已验证：**DSH 0.2.2-rc.3、dsh-toolbox-ui 1.12.0**。在 DSH 插件管理器先安装并启用 `dsh-toolbox-ui@1.12.0`，再从本仓库 [Releases](https://github.com/Leo19990721/dsh-toolbox-enhanced/releases) 下载 `.tgz`，通过插件管理器安装其绝对路径。也可以直接填写对应版本安装包的下载 URL。
+0.1.3 声明支持 DSH `>=0.2.2-rc.3 <0.3.0-0`。本次用 DSH 0.2.2-rc.5 分别配合社区原版 `dsh-toolbox-ui` 1.12.0 和 1.12.1，通过了 Host 和客户端槽位集成测试。
+
+先在 DSH 插件管理器确认社区原版 1.12.0 或 1.12.1 已启用，再从本仓库 [Releases](https://github.com/Leo19990721/dsh-toolbox-enhanced/releases) 下载 `.tgz`，安装该文件的绝对路径。也可直接填写 Release 的安装包下载 URL。
 
 升级时安装新版本的同名包 `@local/dsh-toolbox-enhanced`，保留各台电脑的 MCP 配置。管理器返回“需要重启”时，先结束正在执行的任务再重启 DSH。停用增强可恢复原版组件；不要同时启用旧 `@local/dsh-toolbox-native`。
 
@@ -18,8 +20,10 @@
 
 ## 开发
 
-Node.js 24、pnpm。运行 `pnpm install --ignore-scripts`，然后 `pnpm build`、`pnpm test`。在正在运行的 DSH 会话环境中执行测试，可额外运行安装版 Cordis 和 SlotCore 集成；Desktop 使用 Electron 的 Node 模式访问 ASAR。
+用 Node.js 24 和 pnpm，依次运行 `pnpm install --frozen-lockfile --ignore-scripts`、`pnpm build`、`pnpm test`。开发依赖锁定原版 1.12.1；测试也可用 `DSH_TEST_TOOLBOX_MANIFEST` 指向独立目录下的 1.12.0 公开包清单。
 
-Windows 可执行 `pwsh -NoProfile -File scripts/pack.ps1`，自动构建、测试、检查安装包并生成 `.local-install` 下的版本包和 SHA-256。`-NodePath`、`-PnpmPath` 可显式指定已有运行环境，无需作者电脑上的目录。正式发布上传代码、版本标签、安装包和校验文件，安装仍由 DSH 插件管理器完成。
+Windows 的 `pwsh -NoProfile -File scripts/pack.ps1` 会构建、测试，检查归档文件并在 `.local-install` 生成版本包和 SHA-256。加 `-InstalledRuntime` 会使用 `DSH_INSTALL_DIR` 和 `DSH_NODE_EXECUTABLE` 所指的已安装 DSH 再验证版本门禁、Host 共存和客户端槽位；测试只用项目依赖和自己创建的临时配置。它不读取或修改当前 DSH 配置，不启动浏览器。`-NodePath`、`-PnpmPath` 可显式指定已有工具。
+
+正式发布在本仓库 GitHub Releases 附上 `.tgz` 和校验文件，通过 DSH 插件管理器安装。
 
 原代码来源及 MIT 许可见 [NOTICE](./NOTICE) 和 [LICENSE](./LICENSE)。本项目独立维护。
