@@ -26,7 +26,7 @@ test('release metadata names this enhancement and records tested DSH compatibili
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.equal(pkg.name, '@local/dsh-toolbox-enhanced', 'preserve installed identity');
   assert.match(pkg.repository.url, /github\.com\/Leo19990721\/dsh-toolbox-enhanced/);
-  assert.equal(pkg.engines.dsh, '>=0.2.2-rc.3 <0.3.0-0');
+  assert.equal(pkg.engines.dsh, '>=0.2.2-rc.3');
   assert.equal(pkg.peerDependencies['dsh-toolbox-ui'], '>=1.12.0 <=1.12.1');
   assert.equal(pkg.private, true, 'release the .tgz through GitHub, not npm');
   for (const file of ['README.md', 'NOTICE', 'host.js', 'scripts/pack.ps1']) assert.doesNotMatch(await readFile(new URL(file, root), 'utf8'), /[CE]:[\\/](?:Users|Personal|AI)/);

@@ -17,18 +17,27 @@ const manifest = JSON.parse(await readFile(new URL('../package.json', import.met
 assert.equal(upstream.name, 'dsh-toolbox-ui');
 assert.ok(['1.12.0', '1.12.1'].includes(upstream.version), 'test a supported published toolbox version');
 
-test('installed DSH version gate admits the release and rejects versions outside the range', async () => {
+test('installed DSH version gate admits the minimum and newer versions without exemptions', async () => {
   const { evaluatePluginCompatibility, getDshRuntimeVersion } = await import('@deepseek-ai/dsh-app-boot');
   const installed = JSON.parse(await readFile(join(process.env.DSH_INSTALL_DIR, 'package.json'), 'utf8'));
   assert.equal(getDshRuntimeVersion(), installed.version);
   assert.equal(evaluatePluginCompatibility(manifest), undefined, `installed DSH ${installed.version}`);
   assert.equal(evaluatePluginCompatibility(upstream), undefined, `upstream ${upstream.version} on DSH ${installed.version}`);
-  for (const version of ['0.2.2-rc.3', '0.2.2-rc.5', '0.2.2', '0.2.9-rc.1', '0.2.9']) {
+  for (const version of [
+    '0.2.2-rc.3', '0.2.2-rc.5', '0.2.2', '0.2.9-rc.1', '0.2.9',
+    '0.3.0-0', '0.3.0-rc.1', '0.3.0', '0.4.0-beta.1', '1.0.0', '2.0.0-rc.1',
+  ]) {
     assert.equal(evaluatePluginCompatibility(manifest, {}, version), undefined, version);
   }
-  for (const version of ['0.2.2-rc.2', '0.3.0-0', '0.3.0-rc.1', '0.3.0']) {
-    assert.deepEqual(evaluatePluginCompatibility(manifest, {}, version)?.requirements, { 'engines.dsh': manifest.engines.dsh }, version);
+  for (const version of ['0.2.1', '0.2.2-rc.2']) {
+    assert.deepEqual(evaluatePluginCompatibility(manifest, {}, version), {
+      name: manifest.name, version: manifest.version, runtimeVersion: version,
+      requirements: { 'engines.dsh': '>=0.2.2-rc.3' }, exempted: false,
+    }, version);
   }
+  const upstreamIssue = evaluatePluginCompatibility(upstream, {}, '0.3.0');
+  assert.deepEqual(upstreamIssue?.requirements, { 'engines.dsh': '>=0.2.1-rc.5 <0.3.0' });
+  assert.equal(upstreamIssue?.exempted, false, `upstream ${upstream.version} retains its own requirement`);
 });
 
 test(`installed Host runs original toolbox ${upstream.version} and the companion on an isolated fixture`, { timeout: 15_000 }, async () => {
