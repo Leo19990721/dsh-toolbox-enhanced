@@ -4,9 +4,9 @@
 
 ## 安装
 
-0.1.5 起，增强包不再声明 DSH 版本限制（`engines.dsh`）。本版在 DSH 0.2.2-rc.5 和社区原版 `dsh-toolbox-ui` 1.12.1 上通过 Host 与客户端槽位集成测试；1.12.0 仍在支持范围内，本版未复测。社区原版仍要求 DSH `>=0.2.1-rc.5 <0.3.0`；同时使用两个插件时，也要满足原版的要求。
+0.1.5 起，增强包不再声明 DSH 版本限制（`engines.dsh`）；0.1.6 起，社区原版 `dsh-toolbox-ui` 的 peer 版本要求改为 `*`。本版在 DSH 0.2.2-rc.5 上分别搭配社区原版 1.12.1、1.14.0 通过 Host 与客户端槽位集成测试，不保证其他组合兼容。仍须满足所装原版自己的 DSH 要求；例如这两个原版版本均要求 DSH `>=0.2.1-rc.5 <0.3.0`。
 
-先在 DSH 插件管理器确认社区原版 1.12.0 或 1.12.1 已启用，再从本仓库 [Releases](https://github.com/Leo19990721/dsh-toolbox-enhanced/releases) 下载 `.tgz`，安装该文件的绝对路径。也可直接填写 Release 的安装包下载 URL。
+先在 DSH 插件管理器确认社区原版已启用，再从本仓库 [Releases](https://github.com/Leo19990721/dsh-toolbox-enhanced/releases) 下载 `.tgz`，安装该文件的绝对路径。也可直接填写 Release 的安装包下载 URL。
 
 升级时安装新版本的同名包 `@local/dsh-toolbox-enhanced`，保留各台电脑的 MCP 配置。管理器返回“需要重启”时，先结束正在执行的任务再重启 DSH。停用增强可恢复原版组件；不要同时启用旧 `@local/dsh-toolbox-native`。
 
@@ -20,7 +20,7 @@
 
 ## 开发
 
-用 Node.js 24 和 pnpm，依次运行 `pnpm install --frozen-lockfile --ignore-scripts`、`pnpm build`、`pnpm test`。开发依赖锁定原版 1.12.1；测试也可用 `DSH_TEST_TOOLBOX_MANIFEST` 指向独立目录下的 1.12.0 公开包清单。
+用 Node.js 24 和 pnpm，依次运行 `pnpm install --frozen-lockfile --ignore-scripts`、`pnpm build`、`pnpm test`。默认测试使用锁定的原版 1.12.1；也可用 `DSH_TEST_TOOLBOX_MANIFEST` 指向其他原版版本在独立目录下的包清单，验证其 Host 和客户端能力是否仍能适配。
 
 Windows 的 `pwsh -NoProfile -File scripts/pack.ps1` 会构建、测试，检查归档文件并在 `.local-install` 生成版本包和 SHA-256。加 `-InstalledRuntime` 会使用 `DSH_INSTALL_DIR` 和 `DSH_NODE_EXECUTABLE` 所指的已安装 DSH 再验证版本门禁、Host 共存和客户端槽位；测试只用项目依赖和自己创建的临时配置。它不读取或修改当前 DSH 配置，不启动浏览器。`-NodePath`、`-PnpmPath` 可显式指定已有工具。
 

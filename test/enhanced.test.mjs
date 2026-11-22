@@ -9,8 +9,6 @@ const load = name => import(new URL('../src/' + name, import.meta.url));
 test('companion ships no copied toolbox backend or UI bundle', async () => {
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.equal(pkg.name, '@local/dsh-toolbox-enhanced');
-  assert.equal(pkg.peerDependencies['dsh-toolbox-ui'], '>=1.12.0 <=1.12.1');
-  assert.equal(pkg.devDependencies['dsh-toolbox-ui'], '1.12.1');
   assert.ok(!pkg.files.includes('lib'));
   assert.equal(pkg.exports['./client'], './client.js');
 });
@@ -61,9 +59,10 @@ test('native shell retains original controls, content and window geometry withou
   assert.equal(find(enhanced, n => n.type === 'h2').props.children, 'Toolbox Enhanced');
   assert.equal(find(enhanced, n => n.type?.name === 'EntryMenu'), undefined);
 });
-test('unrecognised upstream UI remains usable instead of being replaced', async () => {
+test('a recognised overlay with an unfamiliar panel structure remains untouched', async () => {
   const { enhancePanel } = await load('client-shell.js');
-  const node = h('div', {}, 'new upstream layout');
+  const node = h('div', { className: 'dsh-mcp-panel-overlay' },
+    h('div', { className: 'dsh-mcp-panel' }, h('div', { className: 'dsh-mcp-wrap' }, 'new upstream layout')));
   assert.equal(enhancePanel(node, React, () => {}, key => key), node);
 });
 test('original update checker detects a newer community release and caches only the original package', async () => {
@@ -72,11 +71,12 @@ test('original update checker detects a newer community release and caches only 
   const base = pathToFileURL(manifest);
   const { checkForUpdate } = await import(new URL('./lib/update-hint.js', base));
   const { version } = JSON.parse(await readFile(base, 'utf8'));
+  const latest = `${Number(version.split('.')[0]) + 1}.0.0`;
   const before = globalThis.fetch, calls = [];
-  globalThis.fetch = async url => { calls.push(url); return { ok: true, json: async () => ({ version: '1.13.0' }) }; };
+  globalThis.fetch = async url => { calls.push(url); return { ok: true, json: async () => ({ version: latest }) }; };
   try {
     const result = await checkForUpdate(Date.now(), true);
-    assert.equal(result.current, version); assert.equal(result.latest, '1.13.0'); assert.equal(result.updateAvailable, true);
+    assert.equal(result.current, version); assert.equal(result.latest, latest); assert.equal(result.updateAvailable, true);
     assert.equal(calls[0], 'https://registry.npmjs.org/dsh-toolbox-ui/latest');
     assert.deepEqual(await checkForUpdate(), result); assert.equal(calls.length, 1);
   } finally { globalThis.fetch = before; }
@@ -99,6 +99,16 @@ test('ordinary edits retain original arguments and result; timeout export and un
   assert.deepEqual(JSON.parse(exported.json).mcpServers.example, { command: 'node', startupTimeoutMs: 60000 });
   dispose();
   assert.deepEqual(Object.getOwnPropertyDescriptors(service), original);
+});
+
+test('the timeout adapter leaves unavailable upstream methods alone', async () => {
+  const { installStartupTimeout } = await load('startup-timeout.js');
+  const service = { update: null, updateHint: async () => 'original update' };
+  const before = Object.getOwnPropertyDescriptors(service);
+  const dispose = installStartupTimeout(service, {});
+  assert.deepEqual(Object.getOwnPropertyDescriptors(service), before);
+  dispose();
+  assert.deepEqual(Object.getOwnPropertyDescriptors(service), before);
 });
 
 test('existing safety policy remains byte-for-byte and keeps approval decisions', async () => {

@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-toolbox-enhanced",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Toolbox Enhanced：社区原版负责功能和更新，本插件只增加原生界面、侧栏入口及本机适配。",
   "main": "host.js",
@@ -39,12 +39,12 @@
     "icon.svg"
   ],
   "peerDependencies": {
-    "dsh-toolbox-ui": ">=1.12.0 <=1.12.1"
+    "dsh-toolbox-ui": "*"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.1.0",
     "@deepseek-ai/cordis-plugin-loader": "1.1.0",
-    "dsh-toolbox-ui": "1.12.1",
+    "dsh-toolbox-ui": "*",
     "react": "18.3.1"
   },
   "dsh": {

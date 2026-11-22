@@ -9,13 +9,13 @@ import { compileFunction } from 'node:vm';
 
 const require = createRequire(import.meta.url);
 const resolve = createRequire(join(process.env.DSH_INSTALL_DIR, 'package.json'));
-const upstreamManifest = process.env.DSH_TEST_TOOLBOX_MANIFEST || require.resolve('dsh-toolbox-ui/package.json');
+const pinnedManifest = require.resolve('dsh-toolbox-ui/package.json');
+const upstreamManifest = process.env.DSH_TEST_TOOLBOX_MANIFEST || pinnedManifest;
 const upstream = JSON.parse(await readFile(upstreamManifest, 'utf8'));
 const upstreamRoot = pathToFileURL(upstreamManifest);
 const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
 assert.equal(upstream.name, 'dsh-toolbox-ui');
-assert.ok(['1.12.0', '1.12.1'].includes(upstream.version), 'test a supported published toolbox version');
 
 test('installed DSH imposes no version gate for the enhancement and keeps the upstream gate', async () => {
   const { evaluatePluginCompatibility, getDshRuntimeVersion } = await import('@deepseek-ai/dsh-app-boot');
@@ -29,9 +29,10 @@ test('installed DSH imposes no version gate for the enhancement and keeps the up
   ]) {
     assert.equal(evaluatePluginCompatibility(manifest, {}, version), undefined, version);
   }
-  const upstreamIssue = evaluatePluginCompatibility(upstream, {}, '0.3.0');
-  assert.deepEqual(upstreamIssue?.requirements, { 'engines.dsh': '>=0.2.1-rc.5 <0.3.0' });
-  assert.equal(upstreamIssue?.exempted, false, `upstream ${upstream.version} retains its own requirement`);
+  const pinned = JSON.parse(await readFile(pinnedManifest, 'utf8'));
+  const upstreamIssue = evaluatePluginCompatibility(pinned, {}, '0.3.0');
+  assert.deepEqual(upstreamIssue?.requirements, { 'engines.dsh': pinned.engines.dsh });
+  assert.equal(upstreamIssue?.exempted, false, `upstream ${pinned.version} retains its own requirement`);
 });
 
 test(`installed Host runs original toolbox ${upstream.version} and the companion on an isolated fixture`, { timeout: 15_000 }, async () => {

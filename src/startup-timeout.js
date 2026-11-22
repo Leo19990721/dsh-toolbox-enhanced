@@ -1,5 +1,5 @@
-// The supported toolbox-ui releases only read their insert rows, while the native editor writes
-// overrides. Never mix those persistence paths or normalize raw !!js values.
+// Toolbox's insert-row persistence and the native editor's overrides are distinct.
+// Never mix those persistence paths or normalize raw !!js values.
 export function installStartupTimeout(service, ctx) {
   const saved = new Map();
   const decorate = (name, wrapper) => {
