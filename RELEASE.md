@@ -1,3 +1,9 @@
+# Toolbox Enhanced 0.1.7
+
+- 「工作区读写（`workspace-write`）」模式下允许使用 Playwright 浏览器 MCP（通过 DSH 原生审批弹窗确认），不再硬拦截；只读模式继续禁止浏览器 MCP。
+- 移除对 `knowledge` MCP 工具名的硬编码白名单，避免未来新增知识库工具被误拦。
+- 工具箱弹窗左上角标题与无障碍标签统一跟随本地化文案（中文「工具箱」/ 英文 `Toolbox`），与侧边栏保持一致。
+
 # Toolbox Enhanced 0.1.6
 
 - 将增强包的 `dsh-toolbox-ui` peer 版本要求改为 `*`。仍需启用社区原版；增强包不按原版版本号拦截，原版自己的 DSH 要求不变，未测试的组合不保证兼容。

@@ -56,7 +56,7 @@ test('native shell retains original controls, content and window geometry withou
   assert.ok(find(enhanced, n => n.props.className === 'dsh-mcp-native-columns'));
   assert.equal(find(enhanced, n => n.props.id === 'live-content'), body);
   assert.equal(find(enhanced, n => n.props.className === 'dsh-mcp-panel').props.role, 'dialog');
-  assert.equal(find(enhanced, n => n.type === 'h2').props.children, 'Toolbox Enhanced');
+  assert.equal(find(enhanced, n => n.type === 'h2').props.children, 'sidebarLabel');
   assert.equal(find(enhanced, n => n.type?.name === 'EntryMenu'), undefined);
 });
 test('a recognised overlay with an unfamiliar panel structure remains untouched', async () => {
@@ -111,13 +111,16 @@ test('the timeout adapter leaves unavailable upstream methods alone', async () =
   assert.deepEqual(Object.getOwnPropertyDescriptors(service), before);
 });
 
-test('existing safety policy remains byte-for-byte and keeps approval decisions', async () => {
-  const { createHash } = await import('node:crypto');
-  const source = await readFile(new URL('lib/local-policy.js', root));
-  assert.equal(createHash('sha256').update(source).digest('hex'), '741aa8e78006aebc3ddb94dc66eb50de9412a8568e711a609e98a4ce7850077e');
-  const { toolDenial, needsSideEffectApproval } = await import(new URL('lib/local-policy.js', root));
+test('local safety policy allows workspace-write Playwright with approval while keeping read-only and leo-env guards', async () => {
+  const { toolDenial, needsSideEffectApproval, sideEffectApprovalReason } = await import(new URL('lib/local-policy.js', root));
   assert.equal(toolDenial('mcp__leo-env__port_audit', 'read-only'), undefined);
+  assert.ok(toolDenial('mcp__leo-env__pm2_control', 'workspace-write'));
   assert.ok(toolDenial('mcp__playwright__browser_snapshot', 'read-only'));
+  assert.equal(toolDenial('mcp__playwright__browser_snapshot', 'workspace-write'), undefined);
+  assert.equal(needsSideEffectApproval('mcp__playwright__browser_snapshot', {}, 'workspace-write'), true);
+  assert.ok(sideEffectApprovalReason('mcp__playwright__browser_snapshot', {}, 'workspace-write'));
+  assert.equal(needsSideEffectApproval('mcp__playwright__browser_snapshot', {}, 'danger-full-access'), false);
+  assert.equal(toolDenial('mcp__knowledge__future_tool', 'workspace-write'), undefined);
   assert.equal(needsSideEffectApproval('mcp__leo-env__pm2_control', { action: 'list' }), false);
   assert.equal(needsSideEffectApproval('mcp__leo-env__pm2_control', { action: 'restart' }), true);
 });

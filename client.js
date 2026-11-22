@@ -35,12 +35,12 @@ function enhancePanel(tree, React, close, t, focusRef) {
       h('div', { className: 'dsh-mcp-head' }, cleanActions), ...children.filter(child => child !== head));
     const navigation = h('nav', { className: 'dsh-mcp-native-nav', role: 'tablist', 'aria-label': t('navigation') },
       ...list(nav.props.children).map((button, index) => !React.isValidElement(button) ? button : React.cloneElement(button, { key: button.key ?? index, className: 'dsh-mcp-native-nav-item' + (button.props['aria-selected'] ? ' sel' : '') })));
-    const titlebar = h('header', { className: 'dsh-mcp-native-titlebar' }, h('h2', null, 'Toolbox Enhanced'),
+    const titlebar = h('header', { className: 'dsh-mcp-native-titlebar' }, h('h2', null, t('sidebarLabel')),
       h('button', { type: 'button', className: 'dsh-mcp-native-close', onClick: close, 'aria-label': t('close'), title: t('close') }, '×'));
     const content = React.cloneElement(wrap, {}, titlebar, h('div', { className: 'dsh-mcp-native-columns' }, navigation, body));
     const originalRef = dialog.ref;
     const ref = value => { if (typeof originalRef === 'function') originalRef(value); else if (originalRef) originalRef.current = value; if (focusRef) focusRef.current = value; };
-    return React.cloneElement(node, { className: node.props.className + ' dsh-toolbox-enhanced' }, React.cloneElement(dialog, { ref, 'aria-label': 'Toolbox Enhanced', 'data-native-toolbox-dialog': '', onKeyDown: event => modalKey(event, close) }, content));
+    return React.cloneElement(node, { className: node.props.className + ' dsh-toolbox-enhanced' }, React.cloneElement(dialog, { ref, 'aria-label': t('sidebarLabel'), 'data-native-toolbox-dialog': '', onKeyDown: event => modalKey(event, close) }, content));
   });
 }
 function modalKey(event, close) {

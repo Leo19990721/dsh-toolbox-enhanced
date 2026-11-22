@@ -1,6 +1,6 @@
 {
   "name": "@local/dsh-toolbox-enhanced",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "description": "Toolbox Enhanced：社区原版负责功能和更新，本插件只增加原生界面、侧栏入口及本机适配。",
   "main": "host.js",
