@@ -94,7 +94,7 @@ export function installClient(ctx, React, css, t) {
   const select = function(id, ...args) { if (id === PANEL && open) { open(); return; } return originalSelect.call(this, id, ...args); };
   ctx.layout.selectPanel = select;
   disposers.push(() => { if (ctx.layout.selectPanel === select) ctx.layout.selectPanel = originalSelect; });
-  disposers.push(ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({ name: 'sidebar.panellist', id: PANEL, order: 1, label: () => t('title') }, Icon)));
+  disposers.push(ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({ name: 'sidebar.panellist', id: PANEL, order: 1, label: () => t('sidebarLabel') }, Icon)));
   disposers.push(ctx.slots.inject('shell.overlay', () => ctx.slots.register({ name: 'shell.overlay', id: PACKAGE + '/style' }, () => h('style', { 'data-plugin': PACKAGE }, css))));
   return () => {
     if (disposed) return; disposed = true;

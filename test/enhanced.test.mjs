@@ -122,7 +122,7 @@ test('slot decoration restores original registrations exactly and keeps upstream
   const ctx = { slots: { entries: key => entries[key] || [], inject: (_key, run) => run(), subscribe: (key, fn) => { listeners.set(key, fn); return () => listeners.delete(key); }, register: (options, component) => { registrations.push({ options, component }); return () => {}; } }, layout: { selectPanel: originalSelect }, effect: fn => { const dispose = fn(); effects.push(dispose); return dispose; } };
   const dispose = installClient(ctx, React, '', key => key);
   assert.notEqual(footer.component, Footer); assert.notEqual(overlay.component, Overlay);
-  assert.ok(registrations.some(row => row.options.name === 'sidebar.panellist'));
+  assert.equal(registrations.find(row => row.options.name === 'sidebar.panellist')?.options.label(), 'sidebarLabel');
   dispose();
   assert.equal(footer.component, Footer); assert.equal(overlay.component, Overlay); assert.equal(ctx.layout.selectPanel, originalSelect); assert.equal(listeners.size, 0);
 });

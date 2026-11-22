@@ -17,23 +17,17 @@ const manifest = JSON.parse(await readFile(new URL('../package.json', import.met
 assert.equal(upstream.name, 'dsh-toolbox-ui');
 assert.ok(['1.12.0', '1.12.1'].includes(upstream.version), 'test a supported published toolbox version');
 
-test('installed DSH version gate admits the minimum and newer versions without exemptions', async () => {
+test('installed DSH imposes no version gate for the enhancement and keeps the upstream gate', async () => {
   const { evaluatePluginCompatibility, getDshRuntimeVersion } = await import('@deepseek-ai/dsh-app-boot');
   const installed = JSON.parse(await readFile(join(process.env.DSH_INSTALL_DIR, 'package.json'), 'utf8'));
   assert.equal(getDshRuntimeVersion(), installed.version);
   assert.equal(evaluatePluginCompatibility(manifest), undefined, `installed DSH ${installed.version}`);
   assert.equal(evaluatePluginCompatibility(upstream), undefined, `upstream ${upstream.version} on DSH ${installed.version}`);
   for (const version of [
-    '0.2.2-rc.3', '0.2.2-rc.5', '0.2.2', '0.2.9-rc.1', '0.2.9',
+    '0.2.1', '0.2.2-rc.2', '0.2.2-rc.3', '0.2.2-rc.5', '0.2.2', '0.2.9-rc.1', '0.2.9',
     '0.3.0-0', '0.3.0-rc.1', '0.3.0', '0.4.0-beta.1', '1.0.0', '2.0.0-rc.1',
   ]) {
     assert.equal(evaluatePluginCompatibility(manifest, {}, version), undefined, version);
-  }
-  for (const version of ['0.2.1', '0.2.2-rc.2']) {
-    assert.deepEqual(evaluatePluginCompatibility(manifest, {}, version), {
-      name: manifest.name, version: manifest.version, runtimeVersion: version,
-      requirements: { 'engines.dsh': '>=0.2.2-rc.3' }, exempted: false,
-    }, version);
   }
   const upstreamIssue = evaluatePluginCompatibility(upstream, {}, '0.3.0');
   assert.deepEqual(upstreamIssue?.requirements, { 'engines.dsh': '>=0.2.1-rc.5 <0.3.0' });
@@ -179,7 +173,12 @@ test(`installed frontend SlotCore decorates actual toolbox ${upstream.version} r
   };
   const selectPanel = id => id;
   const layout = { selectPanel };
-  const locale = { register: () => () => {}, bind: () => key => key };
+  let language = 'zh';
+  const dictionaries = new Map();
+  const locale = {
+    register(name, messages) { dictionaries.set(name, messages); return () => dictionaries.delete(name); },
+    bind: name => key => dictionaries.get(name)?.[language]?.[key],
+  };
   const upstreamContext = {
     slots, get: () => undefined,
     remote: { async $mount(contract) { mounts.push(contract); return () => mounts.pop(); } },
@@ -196,7 +195,11 @@ test(`installed frontend SlotCore decorates actual toolbox ${upstream.version} r
     try {
       assert.notEqual(footer.component, originals[0]);
       assert.notEqual(overlay.component, originals[1]);
-      assert.equal(core.entries('sidebar.panellist').filter(entry => entry.options.id === 'local-toolbox').length, 1);
+      const sidebar = core.entries('sidebar.panellist').filter(entry => entry.options.id === 'local-toolbox');
+      assert.equal(sidebar.length, 1);
+      assert.equal(sidebar[0].options.label(), '工具箱');
+      language = 'en';
+      assert.equal(sidebar[0].options.label(), 'Toolbox');
       assert.equal(core.entries('shell.overlay').filter(entry => entry.options.id === `${manifest.name}/style`).length, 1);
       assert.equal(layout.selectPanel('plugins'), 'plugins');
       assert.equal(mounts.length, 1, 'the companion does not mount a second upstream RPC');

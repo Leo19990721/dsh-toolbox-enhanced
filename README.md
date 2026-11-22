@@ -1,10 +1,10 @@
 # Toolbox Enhanced
 
-配合社区原版 [dsh-toolbox-ui](https://github.com/Imzl-zl/dsh-toolbox-ui) 使用的独立增强插件。原版负责 MCP、技能、工具管理和检查更新；本插件保留设置页风格、上方侧栏入口、既有 MCP 启动超时和工具权限规则。
+配合社区原版 [dsh-toolbox-ui](https://github.com/Imzl-zl/dsh-toolbox-ui) 使用的独立增强插件。原版负责 MCP、技能、工具管理和检查更新；本插件保留设置页风格、上方侧栏的「工具箱」（英文界面为「Toolbox」）入口、既有 MCP 启动超时和工具权限规则。
 
 ## 安装
 
-0.1.4 要求 DSH `>=0.2.2-rc.3`，增强包不设 DSH 版本上限。已在 DSH 0.2.2-rc.5 上分别配合社区原版 `dsh-toolbox-ui` 1.12.0 和 1.12.1，通过 Host 和客户端槽位集成测试。社区原版仍要求 DSH `>=0.2.1-rc.5 <0.3.0`；同时使用两个插件时，也要满足原版的要求。
+0.1.5 起，增强包不再声明 DSH 版本限制（`engines.dsh`）。本版在 DSH 0.2.2-rc.5 和社区原版 `dsh-toolbox-ui` 1.12.1 上通过 Host 与客户端槽位集成测试；1.12.0 仍在支持范围内，本版未复测。社区原版仍要求 DSH `>=0.2.1-rc.5 <0.3.0`；同时使用两个插件时，也要满足原版的要求。
 
 先在 DSH 插件管理器确认社区原版 1.12.0 或 1.12.1 已启用，再从本仓库 [Releases](https://github.com/Leo19990721/dsh-toolbox-enhanced/releases) 下载 `.tgz`，安装该文件的绝对路径。也可直接填写 Release 的安装包下载 URL。
 
