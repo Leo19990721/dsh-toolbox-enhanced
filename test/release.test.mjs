@@ -25,7 +25,7 @@ test('portable bundle resolves its skill root through DSH instead of a computer-
 test('release metadata requires the original Toolbox without gating its version or the DSH version', async () => {
   const pkg = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
   assert.equal(pkg.name, '@local/dsh-toolbox-enhanced', 'preserve installed identity');
-  assert.equal(pkg.version, '0.1.7');
+  assert.equal(pkg.version, '0.1.8');
   assert.match(pkg.repository.url, /github\.com\/Leo19990721\/dsh-toolbox-enhanced/);
   assert.equal(Object.hasOwn(pkg, 'engines'), false);
   assert.equal(pkg.peerDependencies['dsh-toolbox-ui'], '*');

@@ -111,18 +111,15 @@ test('the timeout adapter leaves unavailable upstream methods alone', async () =
   assert.deepEqual(Object.getOwnPropertyDescriptors(service), before);
 });
 
-test('local safety policy allows workspace-write Playwright with approval while keeping read-only and leo-env guards', async () => {
+test('local safety policy allows workspace-write Playwright with approval while blocking read-only Playwright', async () => {
   const { toolDenial, needsSideEffectApproval, sideEffectApprovalReason } = await import(new URL('lib/local-policy.js', root));
-  assert.equal(toolDenial('mcp__leo-env__port_audit', 'read-only'), undefined);
-  assert.ok(toolDenial('mcp__leo-env__pm2_control', 'workspace-write'));
   assert.ok(toolDenial('mcp__playwright__browser_snapshot', 'read-only'));
   assert.equal(toolDenial('mcp__playwright__browser_snapshot', 'workspace-write'), undefined);
   assert.equal(needsSideEffectApproval('mcp__playwright__browser_snapshot', {}, 'workspace-write'), true);
   assert.ok(sideEffectApprovalReason('mcp__playwright__browser_snapshot', {}, 'workspace-write'));
   assert.equal(needsSideEffectApproval('mcp__playwright__browser_snapshot', {}, 'danger-full-access'), false);
   assert.equal(toolDenial('mcp__knowledge__future_tool', 'workspace-write'), undefined);
-  assert.equal(needsSideEffectApproval('mcp__leo-env__pm2_control', { action: 'list' }), false);
-  assert.equal(needsSideEffectApproval('mcp__leo-env__pm2_control', { action: 'restart' }), true);
+  assert.equal(toolDenial('mcp__custom__anything', 'read-only'), undefined);
 });
 
 test('slot decoration restores original registrations exactly and keeps upstream update RPC', async () => {

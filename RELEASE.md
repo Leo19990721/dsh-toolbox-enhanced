@@ -1,3 +1,7 @@
+# Toolbox Enhanced 0.1.8
+
+- 移除 `lib/local-policy.js` 中遗留的个人旧环境 `leo-env` 硬编码规则，保持策略完全通用（仅保留 Playwright 在只读模式下禁止、工作区读写下弹窗审批）。
+
 # Toolbox Enhanced 0.1.7
 
 - 「工作区读写（`workspace-write`）」模式下允许使用 Playwright 浏览器 MCP（通过 DSH 原生审批弹窗确认），不再硬拦截；只读模式继续禁止浏览器 MCP。
